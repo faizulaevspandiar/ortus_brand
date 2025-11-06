@@ -1,54 +1,34 @@
-console.log("🚀 ORTUS BRAND API — STARTED (CORS FIX ENABLED) 🚀");
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import mongoose from "mongoose";
 
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const connectDB = require("./config/db");
-
-const authRoutes = require("./routes/auth");
-const productRoutes = require("./routes/products");
-const orderRoutes = require("./routes/orders");
-
+dotenv.config();
 const app = express();
 
-// Подключаем базу
-connectDB();
-
-// ===============================
-// ✅ Глобальный CORS FIX
-// ===============================
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(
+  cors({
+    origin: "*", // Разрешаем всем
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
-// Логирование
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-  next();
-});
+const PORT = process.env.PORT || 8080; // ВАЖНО: Railway передает порт через env
+const MONGO_URI = process.env.MONGO_URI;
 
-// Основные маршруты
-app.use("/api/auth", authRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/orders", orderRoutes);
+// Подключаем MongoDB
+mongoose
+  .connect(MONGO_URI)
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => console.error("❌ MongoDB error:", err));
 
+// Пример маршрута
 app.get("/", (req, res) => {
-  res.send("Ortus Brand API Running ✅");
+  res.send("🚀 ORTUS BRAND API — RUNNING SUCCESSFULLY!");
 });
 
-// ===============================
-// 🚀 Старт
-// ===============================
-const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
