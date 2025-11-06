@@ -1,7 +1,7 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import mongoose from "mongoose";
+const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv");
+const mongoose = require("mongoose");
 
 dotenv.config();
 const app = express();
@@ -9,22 +9,20 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: "*", // Разрешаем всем
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-const PORT = process.env.PORT || 8080; // ВАЖНО: Railway передает порт через env
+const PORT = process.env.PORT || 8080;
 const MONGO_URI = process.env.MONGO_URI;
 
-// Подключаем MongoDB
 mongoose
   .connect(MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB error:", err));
 
-// Пример маршрута
 app.get("/", (req, res) => {
   res.send("🚀 ORTUS BRAND API — RUNNING SUCCESSFULLY!");
 });
