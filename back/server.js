@@ -11,24 +11,36 @@ const orderRoutes = require("./routes/orders");
 
 const app = express();
 
-// Подключение базы данных
+// Подключаем базу данных
 connectDB();
 
 // ===============================
 // ✅ Глобальная CORS-настройка
 // ===============================
-
-// Разрешаем абсолютно все источники (универсально)
 app.use(
   cors({
-    origin: "*", // 🔥 разрешает запросы со всех доменов
+    origin: "*", // Разрешаем все источники (универсально)
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// Для корректного preflight-запроса (OPTIONS)
-app.options("*", cors());
+// Preflight-запросы (OPTIONS) разрешаем универсально
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    );
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization"
+    );
+    return res.status(204).end();
+  }
+  next();
+});
 
 // ===============================
 // 🧠 Middleware и маршруты
@@ -36,7 +48,7 @@ app.options("*", cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Логирование запросов (для отладки)
+// Логирование запросов
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
   next();
