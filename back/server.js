@@ -1,7 +1,6 @@
-console.log("!!!!!!!!!! ЗАПУЩЕН НОВЫЙ КОД v2 !!!!!!!!!!");
+console.log("🚀 ORTUS BRAND API — STARTED (CORS FIX ENABLED) 🚀");
 
 require("dotenv").config();
-
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
@@ -12,53 +11,51 @@ const orderRoutes = require("./routes/orders");
 
 const app = express();
 
+// Подключение базы данных
 connectDB();
 
-// ДЕБАГ: Ставим логгер ПЕРЕД CORS, чтобы видеть КАЖДЫЙ запрос
-app.use((req, res, next) => {
-  console.log(
-    `[INCOMING] Method: ${req.method} | Path: ${req.path} | Origin: ${req.headers.origin}`
-  );
-  next();
-});
+// ===============================
+// ✅ Глобальная CORS-настройка
+// ===============================
 
-// CORS настройка для Flutter web
+// Разрешаем абсолютно все источники (универсально)
 app.use(
   cors({
-    // ИСПРАВЛЕНИЕ НАВСЕДА:
-    // Мы используем функцию, чтобы динамически разрешать ЛЮБОЙ
-    // origin, который начинается с http://localhost:
-    // Это будет работать для любого порта, который выберет Flutter.
-    origin: function (origin, callback) {
-      // Разрешаем запросы без origin (например, Postman) ИЛИ с localhost
-      if (!origin || /http:\/\/localhost:\d+/.test(origin)) {
-        console.log(`[CORS ALLOWED] Origin: ${origin}`);
-        callback(null, true);
-      } else {
-        // Блокируем все остальное
-        console.error(`[CORS BLOCKED] Origin: ${origin}`);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
+    origin: "*", // 🔥 разрешает запросы со всех доменов
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
+// Для корректного preflight-запроса (OPTIONS)
+app.options("*", cors());
+
+// ===============================
+// 🧠 Middleware и маршруты
+// ===============================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Логирование запросов (для отладки)
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  next();
+});
+
+// Основные маршруты
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 
+// Тестовый маршрут
 app.get("/", (req, res) => {
-  res.send("Ortus Brand API Running");
+  res.send("Ortus Brand API Running ✅");
 });
 
+// ===============================
+// 🚀 Запуск сервера
+// ===============================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  // Я убрал лог "Environment", чтобы мы видели разницу
+  console.log(`✅ Server running on port ${PORT}`);
 });
