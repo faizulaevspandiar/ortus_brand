@@ -11,44 +11,26 @@ const orderRoutes = require("./routes/orders");
 
 const app = express();
 
-// Подключаем базу данных
+// Подключаем базу
 connectDB();
 
 // ===============================
-// ✅ Глобальная CORS-настройка
+// ✅ Глобальный CORS FIX
 // ===============================
-app.use(
-  cors({
-    origin: "*", // Разрешаем все источники (универсально)
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
-// Preflight-запросы (OPTIONS) разрешаем универсально
 app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header(
-      "Access-Control-Allow-Methods",
-      "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-    );
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization"
-    );
-    return res.status(204).end();
+    return res.sendStatus(200);
   }
   next();
 });
 
-// ===============================
-// 🧠 Middleware и маршруты
-// ===============================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Логирование запросов
+// Логирование
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
   next();
@@ -59,15 +41,14 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 
-// Тестовый маршрут
 app.get("/", (req, res) => {
   res.send("Ortus Brand API Running ✅");
 });
 
 // ===============================
-// 🚀 Запуск сервера
+// 🚀 Старт
 // ===============================
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
